@@ -21,6 +21,8 @@ class QuizQuestion : AppCompatActivity(), View.OnClickListener {
     private var mSelectedOptionPosition: Int =0
     private var mCorrectAnswers: Int = 0
     private var mUserName: String? = null
+    private var isOptSelected: Boolean = false
+    private var canSelectOption: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,58 +79,89 @@ class QuizQuestion : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onClick(v: View?) {
-        when (v?.id){
-            R.id.tv_option_one -> {
-                selectedOptionView(tv_option_one,1)
-            }
-            R.id.tv_option_two ->{
-                selectedOptionView(tv_option_two,2)
-            }
-            R.id.tv_option_three -> {
-                selectedOptionView(tv_option_three,3)
-            }
-            R.id.tv_option_four ->{
-                selectedOptionView(tv_option_four,4)
-            }
-            R.id.btn_submit ->{
-                if(mSelectedOptionPosition==0) {
-                    mCurrentPosition++
+        when (v?.id) {
+                R.id.tv_option_one -> {
+                    if(canSelectOption) {
+                        selectedOptionView(tv_option_one, 1)
+                        isOptSelected = true
+                    }
+                    else{
+                        Toast.makeText(this,"Option already selected",Toast.LENGTH_SHORT).show()
+                    }
+                }
+                R.id.tv_option_two ->{
+                    if(canSelectOption) {
+                        selectedOptionView(tv_option_two, 2)
+                        isOptSelected = true
+                    }
+                    else{
+                        Toast.makeText(this,"Option already selected",Toast.LENGTH_SHORT).show()
+                    }
+                }
+                R.id.tv_option_three -> {
+                    if(canSelectOption) {
+                        selectedOptionView(tv_option_three, 3)
+                        isOptSelected = true
+                    }
+                    else{
+                        Toast.makeText(this,"Option already selected",Toast.LENGTH_SHORT).show()
+                    }
 
+                }
+                R.id.tv_option_four ->{
+                    if (canSelectOption) {
+                        selectedOptionView(tv_option_four, 4)
+                        isOptSelected = true
+                    }
+                    else {
+                        Toast.makeText(this,"Option already selected",Toast.LENGTH_SHORT).show()
+                    }
 
-                    when {
-                        mCurrentPosition <= mQuestionsList!!.size -> {
-                            setQuestions()
+                }
+            R.id.btn_submit -> {
+                if (isOptSelected) {
+                    canSelectOption = false
+                    if (mSelectedOptionPosition == 0) {
+                        mCurrentPosition++
+                        isOptSelected = false
+                        when {
+                            mCurrentPosition <= mQuestionsList!!.size -> {
+                                setQuestions()
+                                canSelectOption = true
 
+                            }
+                            else -> {
+                                val intent = Intent(this, ResultActivity::class.java)
+                                intent.putExtra(Constants.USER_Name, mUserName)
+                                intent.putExtra(Constants.CORRECT_ANSWERS, mCorrectAnswers)
+                                intent.putExtra(Constants.TOTAL_QUESTIONS, mQuestionsList!!.size)
+                                startActivity(intent)
+                            }
                         }
-                        else -> {
-                           val intent = Intent(this, ResultActivity::class.java)
-                            intent.putExtra(Constants.USER_Name,mUserName)
-                            intent.putExtra(Constants.CORRECT_ANSWERS,mCorrectAnswers)
-                            intent.putExtra(Constants.TOTAL_QUESTIONS,mQuestionsList!!.size)
-                            startActivity(intent)
+                    } else {
+                        val question = mQuestionsList?.get(mCurrentPosition - 1)
+                        if (question!!.correctOpt != mSelectedOptionPosition) {
+                            answerView(mSelectedOptionPosition, R.drawable.wrong_option_border_bg)
+                        } else {
+                            mCorrectAnswers++
                         }
+                        answerView(question.correctOpt, R.drawable.correct_option_border_bg)
+
+                        if (mCurrentPosition == mQuestionsList!!.size) {
+                            btn_submit.text = "SUBMIT"
+                        } else {
+                            btn_submit.text = "GO TO NEXT QUESTION"
+                        }
+                        mSelectedOptionPosition = 0
                     }
                 }
                 else {
-                    val question = mQuestionsList?.get(mCurrentPosition-1)
-                    if (question!!.correctOpt!= mSelectedOptionPosition) {
-                        answerView(mSelectedOptionPosition, R.drawable.wrong_option_border_bg)
-                    }
-                    else{
-                        mCorrectAnswers++
-                    }
-                    answerView(question.correctOpt,R.drawable.correct_option_border_bg)
-
-                    if(mCurrentPosition==mQuestionsList!!.size){
-                        btn_submit.text = "SUBMIT"
-                    } else{
-                        btn_submit.text = "GO TO NEXT QUESTION"
-                    }
-                    mSelectedOptionPosition =0
-                    }
+                    Toast.makeText(this,"Please select any option!",Toast.LENGTH_SHORT).show()
                 }
             }
-        }
+                }
+            }
+
 
 
 
